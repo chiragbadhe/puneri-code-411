@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Puneri: Real Pune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Kaushan+Script&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: neon-sunset arcade over a real, dusty Pune
+   IDEA: a Vice City cartridge whose city is the actual OSM map of the Peths and FC Road
+   PICTURE: the live 3D city, sunset-lit, streamed from real data
+   COLOUR and TYPE: hot pink, sea teal, marigold; Monoton, Kaushan Script, Rajdhani
+   LAYOUT: full-bleed game, HUD in the corners like the classics */
+:root{--pink:#ff4fa3;--teal:#2ff3e0;--gold:#ffc83d}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;overflow:hidden;background:#140b2b;color:#fff;font:16px/1.4 Rajdhani,system-ui,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+.hidden{display:none!important}
+.o{text-shadow:2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
+#hud{position:fixed;inset:0;pointer-events:none}
+#tr{position:absolute;top:14px;right:18px;text-align:right}
+#clock{font-size:30px;font-weight:700}
+#money{font-size:30px;font-weight:700;color:var(--pink)}
+#stars{font-size:26px;letter-spacing:2px;min-height:30px}
+#stars.flash{animation:fl .5s steps(2) infinite}
+@keyframes fl{50%{color:#ff3b3b}}
+#speed{font-size:18px;font-weight:700;color:var(--teal)}
+#radarw{position:absolute;left:16px;bottom:16px;width:190px;height:190px;border-radius:50%;border:4px solid var(--pink);box-shadow:0 0 0 2px #000;overflow:hidden;background:#1d2230}
+#radar{width:100%;height:100%;display:block}
+#zone{position:absolute;right:20px;bottom:22px;text-align:right;transition:opacity .6s;opacity:0;max-width:min(480px,70vw)}
+#zname{font-family:'Kaushan Script',cursive;font-size:40px;color:#ff79c6;line-height:1.1}
+#zpatya{display:inline-block;margin-top:6px;background:#fffbea;color:#b3121d;border:2px solid #222;padding:4px 10px;font-weight:700;font-size:15px;text-shadow:none}
+#street{position:absolute;right:20px;bottom:4px;font-size:16px;font-weight:700;color:#fff;opacity:.9}
+#obj{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,56vw);text-align:center;font-size:20px;font-weight:700}
+#timer{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:34px;font-weight:700;color:var(--gold)}
+#big{position:absolute;top:28%;left:50%;transform:translateX(-50%);text-align:center;width:90vw;transition:opacity .4s;opacity:0}
+#bigt{font-size:clamp(34px,6vw,64px);font-weight:700;font-style:italic;color:var(--gold);letter-spacing:2px}
+#bigs{font-size:22px;font-weight:700;max-width:760px;margin:0 auto}
+#feed{position:absolute;top:14px;left:16px;width:min(300px,60vw);display:flex;flex-direction:column;gap:6px}
+.post{background:rgba(20,11,43,.82);border-left:4px solid var(--pink);padding:6px 10px;font-size:14px;font-weight:600;animation:pin .3s ease-out}
+.post b{color:var(--teal)}
+@keyframes pin{from{transform:translateX(-30px);opacity:0}}
+#feedh{font-size:12px;font-weight:700;color:var(--pink);letter-spacing:1px}
+#radio{position:absolute;top:58px;left:50%;transform:translateX(-50%);font-size:24px;font-weight:700;color:var(--teal);transition:opacity .5s;opacity:0;white-space:nowrap}
+#hint{position:absolute;left:50%;bottom:66px;transform:translateX(-50%);font-size:17px;font-weight:700;background:rgba(0,0,0,.5);padding:4px 12px;white-space:nowrap}
+#title,#loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;background:linear-gradient(180deg,rgba(20,11,43,.85) 0%,rgba(80,20,90,.5) 45%,rgba(255,79,163,.28) 75%,rgba(255,179,107,.38) 100%)}
+#title h1{font-family:Monoton,cursive;font-weight:400;font-size:clamp(48px,12vw,124px);margin:0;line-height:1;color:var(--pink);text-shadow:4px 4px 0 #2a0b3d,0 0 24px rgba(255,79,163,.6)}
+#title h2{font-family:'Kaushan Script',cursive;font-weight:400;font-size:clamp(30px,6vw,58px);margin:-4px 0 6px;color:var(--teal);text-shadow:3px 3px 0 #2a0b3d}
+#title p{margin:4px 0 18px;font-size:18px;max-width:600px;font-weight:600}
+.btn{pointer-events:auto;font:700 22px Rajdhani,sans-serif;letter-spacing:2px;color:#2a0b3d;background:var(--gold);border:0;padding:12px 34px;cursor:pointer;min-height:48px;box-shadow:4px 4px 0 var(--pink)}
+.btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.btn.alt{background:transparent;color:#fff;box-shadow:none;border:2px solid #fff;font-size:16px;padding:8px 18px}
+#keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:4px 18px;margin-top:20px;max-width:680px;width:100%;font-size:15px;font-weight:600;text-align:left}
+#keys span b{color:var(--gold);display:inline-block;min-width:64px}
+.note{margin-top:14px;font-size:13px;opacity:.8;max-width:640px}
+#loadbar{width:min(420px,80vw);height:10px;border:2px solid #fff;margin-top:16px}
+#loadfill{height:100%;width:0;background:var(--pink);transition:width .2s}
+#pause{position:fixed;inset:0;background:rgba(20,11,43,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+#pause h3{font-family:Monoton,cursive;font-weight:400;font-size:clamp(36px,8vw,64px);margin:0;color:var(--pink)}
+#mapov{position:fixed;inset:0;background:rgba(10,6,24,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+#mapc{max-width:94vw;max-height:84vh;pointer-events:auto;cursor:crosshair}
+#maph{font-weight:700;color:var(--teal)}
+#touch{position:fixed;inset:0;pointer-events:none}
+#touch button{pointer-events:auto;position:absolute;width:74px;height:74px;border-radius:50%;border:3px solid rgba(255,255,255,.7);background:rgba(20,11,43,.45);color:#fff;font:700 18px Rajdhani,sans-serif;touch-action:none}
+#touch button.sm{width:52px;height:52px;font-size:14px}
+#touch button.on{background:rgba(255,79,163,.6)}
+#credit{position:fixed;right:6px;top:2px;font-size:11px;opacity:.7;pointer-events:none}
+@media(max-width:700px){#radarw{width:130px;height:130px}#zname{font-size:28px}#clock,#money{font-size:24px}#feed{width:220px}.post{font-size:12px}#obj{font-size:16px;bottom:110px;width:80vw}#hint{bottom:150px;font-size:14px}#street{display:none}}
+@media(prefers-reduced-motion:reduce){.post{animation:none}#stars.flash{animation:none;color:#ff3b3b}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="credit" class="o">Map data &copy; OpenStreetMap contributors (ODbL) &middot; Elevation: SRTM</div>
+
+<div id="hud" class="hidden">
+  <div id="feed"><div id="feedh" class="o">REELBAZAAR</div></div>
+  <div id="tr" class="o"><div id="clock">18:20</div><div id="money">$00000000</div><div id="stars"></div><div id="speed"></div></div>
+  <div id="timer" class="o"></div>
+  <div id="radio" class="o"></div>
+  <div id="big" class="o"><div id="bigt"></div><div id="bigs"></div></div>
+  <div id="hint" class="hidden"></div>
+  <div id="obj" class="o"></div>
+  <div id="zone" class="o"><div id="zname"></div><div id="zpatya"></div></div>
+  <div id="street" class="o"></div>
+  <div id="radarw"><canvas id="radar" width="220" height="220"></canvas></div>
+</div>
+
+<div id="touch" class="hidden">
+  <button data-k="ArrowLeft" style="left:18px;bottom:130px">&#9664;</button>
+  <button data-k="ArrowRight" style="left:104px;bottom:130px">&#9654;</button>
+  <button data-k="KeyW" style="right:18px;bottom:120px">GAS</button>
+  <button data-k="KeyS" style="right:104px;bottom:96px">BRK</button>
+  <button data-k="Space" style="right:60px;bottom:22px">DRIFT</button>
+  <button class="sm" data-k="KeyF" style="right:18px;top:170px">F</button>
+  <button class="sm" data-k="KeyR" style="right:78px;top:170px">RAD</button>
+  <button class="sm" data-k="KeyM" style="right:138px;top:170px">MAP</button>
+  <button class="sm" data-k="KeyH" style="right:198px;top:170px">HORN</button>
+  <button class="sm" data-k="KeyP" style="left:50%;top:10px;margin-left:-26px">II</button>
+</div>
+
+<div id="loading"><div class="o" style="font-size:22px;font-weight:700">Building real Pune from OpenStreetMap&hellip;</div><div id="loadbar"><div id="loadfill"></div></div><div id="loadtxt" class="o note"></div></div>
+
+<div id="title" class="hidden">
+  <h1>PUNERI</h1>
+  <h2>Real Pune</h2>
+  <p class="o">The real streets of the Peths and FC Road, from Shaniwar Wada to Deccan Corner, Lakdi Pul to Dagdusheth. Five jobs, one city, and every Puneri has an opinion about your driving.</p>
+  <button class="btn" id="startb">PRESS ENTER TO PLAY</button>
+  <div id="keys" class="o">
+    <span><b>W / &#8593;</b> Accelerate, walk</span><span><b>S / &#8595;</b> Brake, reverse</span>
+    <span><b>A D / &#8592; &#8594;</b> Steer, turn</span><span><b>Space</b> Handbrake drift</span>
+    <span><b>Shift</b> Run</span><span><b>F</b> Enter or exit vehicle</span>
+    <span><b>R</b> Change radio</span><span><b>M</b> Map, click to set GPS</span>
+    <span><b>C</b> Camera</span><span><b>H</b> Horn</span>
+    <span><b>O</b> Weather</span><span><b>P / Esc</b> Pause</span>
+  </div>
+  <div class="note o">Fan-made original game. Real street layout from OpenStreetMap; building heights estimated. Characters, brands and music are fictional.</div>
+</div>
+
+<div id="pause" class="hidden">
+  <h3>PAUSED</h3>
+  <button class="btn" id="resumeb">RESUME</button>
+  <button class="btn alt" id="resetb">Reset saved money and missions</button>
+</div>
+
+<div id="mapov" class="hidden"><canvas id="mapc" width="900" height="800"></canvas><div id="maph" class="o">Click a place to set GPS &middot; M to close</div></div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+numpy>=1.26
+shapely>=2.0
+pillow>=10.0
+trimesh>=4.0        # only for export_gltf.py
+mapbox_earcut       # trimesh polygon triangulation
+playwright          # only for tools/smoke_test.py
